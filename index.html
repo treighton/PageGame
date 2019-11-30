@@ -9,12 +9,41 @@
       #game_id {
         display: flex;
         justify-content: center;
-        align-items: center;
-        height: 100vh;
+        max-height: 800px;
+      }
+      .text-center {
+        text-align: center !important;
+      }
+      .container {
+        max-width: 1000px;
+        margin: auto;
       }
     </style>
   </head>
   <body>
+    <div class="container">
+      <div class="text-center">
+        <h1>Page's Pages</h1>
+      </div>
+      <h2>Concept</h2>
+      <p>
+        You are Dave a graphic design student and today is the first day of your
+        internship at Page's Pages, a local graphic design studio. Upon arriving
+        to the studio, it's not quite what you expect, but you need to get to
+        your desk so that you can get to work! ps - Whatch out for Bats!
+      </p>
+      <h2>Controls</h2>
+      <p>Use Arrow Keys to move character</p>
+      <h2>Mechanics</h2>
+      <ul>
+        <li>You are trying to get to your desk.</li>
+        <li>You must avoid colliding with the enemies (Bats)</li>
+        <li>
+          If you collide with a Bat the game resets If you make it to your desk
+          you win!
+        </li>
+      </ul>
+    </div>
     <div id="game_id"></div>
     <script src="app.bundle.js"></script>
   </body>
