@@ -16,6 +16,7 @@ class SimpleScene extends Phaser.Scene {
   enemies = null;
   goal = null;
   cursors = null;
+  spawnPoint = null;
 
   init() {
     this.playerSpeed = 5;
@@ -25,6 +26,8 @@ class SimpleScene extends Phaser.Scene {
     this.enemyMaxY = 280;
     this.isTerminating = false;
     this.map;
+    this.health = 3;
+    this.invincible = false;
   }
 
   preload() {
@@ -61,13 +64,37 @@ class SimpleScene extends Phaser.Scene {
       "TileD_PHC_Exterior-Windows&Doors",
       "windows"
     );
-    this.map.createStaticLayer("Ground", [tileset, general, nature]);
-    const desks = this.map.createStaticLayer("Desks", officeTiles);
-    this.map.createStaticLayer("windows", [windowTiles, officeTiles]);
-    desks.setCollisionByProperty({ Goal: true });
 
+    this.map.createStaticLayer("Ground", [tileset, general, nature], 0, 0);
+    const collideLayer = this.map.createStaticLayer(
+      "collide",
+      [tileset, general, nature],
+      0,
+      0
+    );
+    collideLayer.setCollisionByProperty({ collide: true });
+    this.map.createStaticLayer(
+      "windows",
+      [windowTiles, officeTiles, general],
+      0,
+      0
+    );
+    const desks = this.map.createStaticLayer("Desks", officeTiles, 0, 0);
+    desks.setCollisionByProperty({ Goal: true });
     //add player
-    this.player = this.physics.add.sprite(70, 200, "player");
+    this.spawnPoint = this.map.findObject(
+      "Player",
+      obj => obj.name === "Player"
+    );
+
+    this.player = this.physics.add.sprite(
+      this.spawnPoint.x,
+      this.spawnPoint.y,
+      "player"
+    );
+    this.physics.add.collider(this.player, collideLayer, () =>
+      console.log("wtf")
+    );
 
     this.physics.add.collider(
       desks,
@@ -118,7 +145,7 @@ class SimpleScene extends Phaser.Scene {
     );
 
     const camera = this.cameras.main;
-    camera.startFollow(this.player);
+
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
   }
 
@@ -202,13 +229,20 @@ class SimpleScene extends Phaser.Scene {
   }
 
   lose() {
-    this.isTerminating = true;
+    if (this.invincible) return;
     this.cameras.main.shake(250);
+    this.invincible = true;
     this.cameras.main.on(
       "camerashakecomplete",
       function(camera, effect) {
         // restart the Scene
-        this.cameras.main.fade(500);
+        if (this.health === 0) {
+          this.isTerminating = true;
+          this.cameras.main.fade(500);
+        } else {
+          this.health += -1;
+          this.cameras.main.fade(500);
+        }
       },
       this
     );
@@ -216,7 +250,12 @@ class SimpleScene extends Phaser.Scene {
       "camerafadeoutcomplete",
       function(camera, effect) {
         // restart the Scene
-        this.scene.restart();
+        if (this.health === 0) {
+          this.scene.restart();
+        } else {
+          this.scene.restart();
+          return;
+        }
       },
       this
     );
